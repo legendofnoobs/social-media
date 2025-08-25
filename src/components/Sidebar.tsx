@@ -59,7 +59,7 @@ async function Sidebar() {
                             </div>
                             <div className="flex items-center text-muted-foreground">
                                 {user.website && (
-                                    <div>
+                                    <div className="flex items-center">
                                         <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
                                         <a href={`${user.website}`} className="hover:underline truncate" target="_blank">
                                             {user.website}

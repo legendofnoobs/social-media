@@ -56,8 +56,8 @@ export async function searchUsersAndPosts(searchTerm: string) {
                         comments: true,
                     },
                 },
-                comments: {
-                     include: {  // Ensure author details are included
+                 comments:  { // Ensure author details are included
+                    include: {
                         author: {
                             select: {
                                 id: true,
@@ -66,8 +66,8 @@ export async function searchUsersAndPosts(searchTerm: string) {
                                 image: true,
                             },
                         },
-                    },
-                }, // Include comments
+                    }
+                 }, // Include comments
             },
             take: 5, // Limit the number of posts returned
         });
