@@ -4,6 +4,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -27,12 +29,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <ClerkProvider>
 
-            <html lang="en" suppressHydrationWarning>
-                <body
-                    className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-                >
+        <html lang="en" suppressHydrationWarning={true}>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+                <ClerkProvider>
                     <ThemeProvider
                         attribute="class"
                         defaultTheme="system"
@@ -46,7 +48,7 @@ export default function RootLayout({
                                 <div className="max-w-7xl mx-auto px-4">
                                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                         <div className="hidden lg:block lg:col-span-3">
-                                            Sidebar
+                                            <Sidebar />
                                         </div>
                                         <div className="lg:col-span-9">
                                             {children}
@@ -55,9 +57,11 @@ export default function RootLayout({
                                 </div>
                             </main>
                         </div>
+                        <Toaster position="bottom-right" reverseOrder={true} />
                     </ThemeProvider>
-                </body>
-            </html>
-        </ClerkProvider>
+                </ClerkProvider>
+            </body>
+        </html>
+
     );
 }
