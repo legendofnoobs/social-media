@@ -4,10 +4,10 @@ export default clerkMiddleware();
 
 export const config = {
     matcher: [
-        // Run middleware on all routes EXCEPT:
-        // - Next.js internals
-        // - Static assets
-        // - Clerk/Next API routes
-        '/((?!_next|.*\\..*|api/(clerk|auth|webhooks)).*)',
+        // Match everything except:
+        // - _next (Next.js internals)
+        // - files with an extension
+        // - api/clerk, api/auth, api/webhooks
+        '/((?!_next)(?!.*\\..*)(?!api/clerk)(?!api/auth)(?!api/webhooks).*)',
     ],
 };
