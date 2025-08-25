@@ -113,11 +113,11 @@ function ProfilePageClient({
                                 <div className="flex items-center justify-start w-full gap-6">
                                     <div>
                                         <Avatar className="w-24 h-24">
-                                            <AvatarImage src={currentUser?.imageUrl || "/avatar.png"} />
+                                            <AvatarImage src={user.image || "/avatar.png"} />
                                         </Avatar>
                                     </div>
                                     <div>
-                                        <h1 className="text-2xl font-bold mb-2">{user.name ?? user.username}</h1>
+                                        <h1 className="text-2xl font-bold mb-2 text-start">{user.name ?? user.username}</h1>
                                         {/* PROFILE STATS */}
                                         <div className="flex items-center gap-2">
                                             <Link href={`/profile/${user.username}/following`}>
@@ -153,11 +153,11 @@ function ProfilePageClient({
                                             {copied ? (
                                                 <>
                                                     <CheckIcon className="h-4 w-4" />
-                                                    Copied to clipboard 
+                                                    Copied to clipboard
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Share className="h-4 w-4"/>
+                                                    <Share className="h-4 w-4" />
                                                     Share Profile
                                                 </>
                                             )}
