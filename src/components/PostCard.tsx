@@ -31,8 +31,8 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
     const [isCommenting, setIsCommenting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [hasLiked, setHasLiked] = useState(post.likes.some((like) => like.userId === dbUserId));
-    const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
+    const [hasLiked, setHasLiked] = useState(post.likes?.some((like) => like.userId === dbUserId) ?? false); // Add null check
+    const [optimisticLikes, setOptmisticLikes] = useState(post._count?.likes || 0); // Add null check
     const [showComments, setShowComments] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editedContent, setEditedContent] = useState(post.content || "");
@@ -259,7 +259,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                                             placeholder="Write a comment..."
                                             value={newComment}
                                             onChange={(e) => setNewComment(e.target.value)}
-                                            className="min-h-[80px] resize-none"
+                                            className="min-h-[80px resize-none"
                                         />
                                         <div className="flex justify-end mt-2">
                                             <Button
@@ -297,4 +297,5 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
         </Card>
     );
 }
+
 export default PostCard;
