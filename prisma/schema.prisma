@@ -45,7 +45,7 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade) 
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   // cascade delete means delete all posts if author is deleted
   comments      Comment[]
   likes         Like[]

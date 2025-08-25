@@ -1,6 +1,7 @@
 "use client";
 
 import { createComment, deletePost, getPosts, toggleLike } from "@/actions/post.action";
+import { editPost } from "@/actions/edit-post.action";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -10,8 +11,16 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { DeleteAlertDialog } from "./DeleteAlertDialog";
 import { Button } from "./ui/button";
-import { HeartIcon, LogInIcon, MessageCircleIcon, SendIcon } from "lucide-react";
+import { HeartIcon, LogInIcon, MessageCircleIcon, SendIcon, EditIcon } from "lucide-react";
 import { Textarea } from "./ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 type Posts = Awaited<ReturnType<typeof getPosts>>;
 type Post = Posts[number];
@@ -25,6 +34,9 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
     const [hasLiked, setHasLiked] = useState(post.likes.some((like) => like.userId === dbUserId));
     const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
     const [showComments, setShowComments] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editedContent, setEditedContent] = useState(post.content || "");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLike = async () => {
         if (isLiking) return;
@@ -71,6 +83,19 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
         }
     };
 
+    const handleEditPost = async () => {
+        setIsSubmitting(true);
+        const result = await editPost(post.id, editedContent);
+
+        if (result?.success) {
+            toast.success("Post updated successfully!");
+            setIsEditDialogOpen(false);
+        } else {
+            toast.error(result?.error || "Failed to update post.");
+        }
+        setIsSubmitting(false);
+    };
+
     return (
         <Card className="overflow-hidden">
             <CardContent className="p-4 sm:p-6">
@@ -98,10 +123,54 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                                         <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
                                     </div>
                                 </div>
-                                {/* Check if current user is the post author */}
-                                {dbUserId === post.author.id && (
-                                    <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
-                                )}
+                                <div className="flex items-center space-x-2">
+                                    {/* Check if current user is the post author */}
+                                    {dbUserId === post.author.id && (
+                                        <>
+                                            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <EditIcon className="h-4 w-4 mr-2" /> Edit
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[425px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Edit Post</DialogTitle>
+                                                        <DialogDescription>
+                                                            Make changes to your post here.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="grid gap-4">
+                                                        <div className="space-y-2">
+                                                            <Textarea
+                                                                value={editedContent}
+                                                                onChange={(e) => setEditedContent(e.target.value)}
+                                                                placeholder="Edit your post content..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-end mt-4">
+                                                        <Button
+                                                            type="button"
+                                                            variant="secondary"
+                                                            onClick={() => setIsEditDialogOpen(false)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            onClick={handleEditPost}
+                                                            disabled={isSubmitting}
+                                                        >
+                                                            {isSubmitting ? "Updating..." : "Update Post"}
+                                                        </Button>
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+                                            <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <p className="mt-2 text-sm text-foreground break-words">{post.content}</p>
                         </div>
