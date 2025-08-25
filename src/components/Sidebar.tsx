@@ -1,19 +1,47 @@
-import { currentUser } from "@clerk/nextjs/server";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
-import { getUserByClerkId } from "@/actions/user.action";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { LinkIcon, MapPinIcon } from "lucide-react";
+import { getUserByClerkId } from "@/actions/user.action";
 
-async function Sidebar() {
-    const authUser = await currentUser();
-    if (!authUser) return <UnAuthenticatedSidebar />;
+export default function Sidebar() {
+    const { user: authUser, isLoaded } = useUser();
+    const [dbUser, setDbUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    const user = await getUserByClerkId(authUser.id);
-    if (!user) return null;
+    useEffect(() => {
+        if (authUser) {
+            (async () => {
+                setLoading(true);
+                const user = await getUserByClerkId(authUser.id);
+                setDbUser(user);
+                setLoading(false);
+            })();
+        } else {
+            setDbUser(null);
+            setLoading(false);
+        }
+    }, [authUser]);
+
+    if (!isLoaded || loading) {
+        return (
+            <div className="sticky top-20">
+                <Card>
+                    <CardContent className="pt-6 text-center">
+                        <p className="text-sm text-muted-foreground">Loading...</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!authUser || !dbUser) return <UnAuthenticatedSidebar />;
 
     return (
         <div className="sticky top-20">
@@ -21,31 +49,40 @@ async function Sidebar() {
                 <CardContent className="pt-6">
                     <div className="flex flex-col items-center text-center">
                         <Link
-                            href={`/profile/${user.username}`}
+                            href={`/profile/${dbUser.username}`}
                             className="flex flex-col items-center justify-center"
                         >
                             <Avatar className="w-20 h-20 border-2 ">
-                                <AvatarImage src={authUser.raw?.image_url || "/avatar.png"} />
+                                <AvatarImage
+                                    src={authUser.imageUrl || "/avatar.png"}
+                                    alt={dbUser.name}
+                                />
                             </Avatar>
 
                             <div className="mt-4 space-y-1">
-                                <h3 className="font-semibold">{user.name}</h3>
-                                <p className="text-sm text-muted-foreground">{user.username}</p>
+                                <h3 className="font-semibold">{dbUser.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {dbUser.username}
+                                </p>
                             </div>
                         </Link>
 
-                        {user.bio && <p className="mt-3 text-sm text-muted-foreground">{user.bio}</p>}
+                        {dbUser.bio && (
+                            <p className="mt-3 text-sm text-muted-foreground">
+                                {dbUser.bio}
+                            </p>
+                        )}
 
                         <div className="w-full">
                             <Separator className="my-4" />
                             <div className="flex justify-around">
                                 <div>
-                                    <p className="font-medium">{user._count.following}</p>
+                                    <p className="font-medium">{dbUser._count.following}</p>
                                     <p className="text-xs text-muted-foreground">Following</p>
                                 </div>
                                 <Separator orientation="vertical" />
                                 <div>
-                                    <p className="font-medium">{user._count.followers}</p>
+                                    <p className="font-medium">{dbUser._count.followers}</p>
                                     <p className="text-xs text-muted-foreground">Followers</p>
                                 </div>
                             </div>
@@ -55,14 +92,18 @@ async function Sidebar() {
                         <div className="w-full space-y-2 text-sm">
                             <div className="flex items-center text-muted-foreground">
                                 <MapPinIcon className="w-4 h-4 mr-2" />
-                                {user.location || "No location"}
+                                {dbUser.location || "No location"}
                             </div>
                             <div className="flex items-center text-muted-foreground">
-                                {user.website && (
+                                {dbUser.website && (
                                     <div className="flex items-center">
                                         <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
-                                        <a href={`${user.website}`} className="hover:underline truncate" target="_blank">
-                                            {user.website}
+                                        <a
+                                            href={`${dbUser.website}`}
+                                            className="hover:underline truncate"
+                                            target="_blank"
+                                        >
+                                            {dbUser.website}
                                         </a>
                                     </div>
                                 )}
@@ -75,13 +116,13 @@ async function Sidebar() {
     );
 }
 
-export default Sidebar;
-
 const UnAuthenticatedSidebar = () => (
     <div className="sticky top-20">
         <Card>
             <CardHeader>
-                <CardTitle className="text-center text-xl font-semibold">Welcome Back!</CardTitle>
+                <CardTitle className="text-center text-xl font-semibold">
+                    Welcome Back!
+                </CardTitle>
             </CardHeader>
             <CardContent>
                 <p className="text-center text-muted-foreground mb-4">
