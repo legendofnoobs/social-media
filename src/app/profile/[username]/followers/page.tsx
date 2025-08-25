@@ -2,7 +2,11 @@ import { getFollowers, getProfileByUsername } from "@/actions/profile.action";
 import { notFound } from "next/navigation";
 import FollowListClient from "../FollowListClient";
 
-export async function generateMetadata({ params }: { params: { username: string } }) {
+interface Params {
+    username: string;
+}
+
+export async function generateMetadata({ params }: { params: Params }) {
     const { username } = await params;
     const user = await getProfileByUsername(username);
 
@@ -17,7 +21,7 @@ export async function generateMetadata({ params }: { params: { username: string 
     };
 }
 
-async function FollowersPage({ params }: { params: { username: string } }) {
+async function FollowersPage({ params }: { params: Params }) {
     const { username } = await params;
     const user = await getProfileByUsername(username);
 
