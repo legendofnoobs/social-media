@@ -27,7 +27,10 @@ import {
     HeartIcon,
     LinkIcon,
     MapPinIcon,
+    CheckIcon,
+    Share
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -58,6 +61,14 @@ function ProfilePageClient({
         location: user.location || "",
         website: user.website || "",
     });
+
+    const [copied, setCopied] = useState(false);
+
+    const handleShareProfile = async () => {
+        await navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleEditSubmit = async () => {
         const formData = new FormData();
@@ -95,39 +106,34 @@ function ProfilePageClient({
     return (
         <div className="max-w-3xl mx-auto">
             <div className="grid grid-cols-1 gap-6">
-                <div className="w-full max-w-lg mx-auto">
+                <div className="w-full mx-auto">
                     <Card className="bg-card">
                         <CardContent className="pt-6">
                             <div className="flex flex-col items-center text-center">
-                                <div className="flex justify-around w-full">
+                                <div className="flex items-center justify-start w-full gap-6">
                                     <div>
                                         <Avatar className="w-24 h-24">
                                             <AvatarImage src={currentUser?.imageUrl || "/avatar.png"} />
                                         </Avatar>
                                     </div>
                                     <div>
-                                        <h1 className="mt-4 text-2xl font-bold">{user.name ?? user.username}</h1>
-                                        <p className="text-muted-foreground">@{user.username}</p>
-                                        <p className="mt-2 text-sm">{user.bio}</p>
-                                    </div>
-                                </div>
-
-                                {/* PROFILE STATS */}
-                                <div className="w-full mt-6">
-                                    <div className="flex justify-around mb-4">
-                                        <div>
-                                            <div className="font-semibold">{user._count.following.toLocaleString()}</div>
-                                            <div className="text-sm text-muted-foreground">Following</div>
-                                        </div>
-                                        <Separator orientation="vertical" />
-                                        <div>
-                                            <div className="font-semibold">{user._count.followers.toLocaleString()}</div>
-                                            <div className="text-sm text-muted-foreground">Followers</div>
-                                        </div>
-                                        <Separator orientation="vertical" />
-                                        <div>
-                                            <div className="font-semibold">{user._count.posts.toLocaleString()}</div>
-                                            <div className="text-sm text-muted-foreground">Posts</div>
+                                        <h1 className="text-2xl font-bold mb-2">{user.name ?? user.username}</h1>
+                                        {/* PROFILE STATS */}
+                                        <div className="flex items-center gap-2">
+                                            <Link href={`/profile/${user.username}/following`}>
+                                                <div className="font-semibold">{user._count.following.toLocaleString()}</div>
+                                                <div className="text-sm text-muted-foreground">Following</div>
+                                            </Link>
+                                            <Separator orientation="vertical" />
+                                            <Link href={`/profile/${user.username}/followers`}>
+                                                <div className="font-semibold">{user._count.followers.toLocaleString()}</div>
+                                                <div className="text-sm text-muted-foreground">Followers</div>
+                                            </Link>
+                                            <Separator orientation="vertical" />
+                                            <div>
+                                                <div className="font-semibold">{user._count.posts.toLocaleString()}</div>
+                                                <div className="text-sm text-muted-foreground">Posts</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -138,10 +144,25 @@ function ProfilePageClient({
                                         <Button className="w-full mt-4">Follow</Button>
                                     </SignInButton>
                                 ) : isOwnProfile ? (
-                                    <Button className="w-full mt-4" onClick={() => setShowEditDialog(true)}>
-                                        <EditIcon className="size-4 mr-2" />
-                                        Edit Profile
-                                    </Button>
+                                    <div className="flex w-full gap-4">
+                                        <Button className="w-full mt-4" onClick={() => setShowEditDialog(true)}>
+                                            <EditIcon className="size-4 mr-2" />
+                                            Edit Profile
+                                        </Button>
+                                        <Button className="w-full mt-4" onClick={handleShareProfile} disabled={copied}>
+                                            {copied ? (
+                                                <>
+                                                    <CheckIcon className="h-4 w-4" />
+                                                    Copied to clipboard 
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Share className="h-4 w-4"/>
+                                                    Share Profile
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                 ) : (
                                     <Button
                                         className="w-full mt-4"

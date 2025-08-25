@@ -1,22 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Loader2Icon } from "lucide-react";
 import toast from "react-hot-toast";
 import { toggleFollow } from "@/actions/user.action";
+import { isFollowing } from "@/actions/profile.action";
 
 function FollowButton({ userId }: { userId: string }) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isFollowingUser, setIsFollowingUser] = useState(false);
+
+    useEffect(() => {
+        const checkFollowingStatus = async () => {
+            const following = await isFollowing(userId);
+            setIsFollowingUser(following);
+        };
+
+        checkFollowingStatus();
+    }, [userId]);
 
     const handleFollow = async () => {
         setIsLoading(true);
-
         try {
-            await toggleFollow(userId);
-            toast.success("User followed successfully");
+            const { message } = await toggleFollow(userId);
+            setIsFollowingUser(!isFollowingUser); // Update the state optimistically
+            toast.success(message);
         } catch (error) {
-            toast.error("Error following user");
+            toast.error("Error toggling follow");
         } finally {
             setIsLoading(false);
         }
@@ -25,13 +36,20 @@ function FollowButton({ userId }: { userId: string }) {
     return (
         <Button
             size={"sm"}
-            variant={"secondary"}
+            variant={isFollowingUser ? "outline" : "secondary"}
             onClick={handleFollow}
             disabled={isLoading}
             className="w-20"
         >
-            {isLoading ? <Loader2Icon className="size-4 animate-spin" /> : "Follow"}
+            {isLoading ? (
+                <Loader2Icon className="size-4 animate-spin" />
+            ) : isFollowingUser ? (
+                "Unfollow"
+            ) : (
+                "Follow"
+            )}
         </Button>
     );
 }
+
 export default FollowButton;
