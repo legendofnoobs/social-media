@@ -97,7 +97,8 @@ function SearchPage() {
                         <div className="space-y-6"> {/* Changed Card to a div to apply spacing */}
                             <h2 className="text-lg font-semibold mb-2">Posts</h2>
                             {searchResults.posts.map((post) => (
-                                <PostCard key={post.id} post={post} dbUserId={null} /> // Render PostCard
+                                // @ts-ignore
+                                <PostCard key={post.id} post={post} dbUserId={null} />
                             ))}
                         </div>
                     )}

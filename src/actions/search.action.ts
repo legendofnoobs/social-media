@@ -45,18 +45,7 @@ export async function searchUsersAndPosts(searchTerm: string) {
                         image: true,
                     },
                 },
-                likes: { // Include likes
-                    select: {
-                        userId: true,
-                    },
-                },
-                _count: { // Include _count
-                    select: {
-                        likes: true,
-                        comments: true,
-                    },
-                },
-                 comments:  { // Ensure author details are included
+                comments: {
                     include: {
                         author: {
                             select: {
@@ -66,8 +55,22 @@ export async function searchUsersAndPosts(searchTerm: string) {
                                 image: true,
                             },
                         },
+                    },
+                    orderBy: {
+                        createdAt: "asc",
                     }
-                 }, // Include comments
+                },
+                likes: {
+                    select: {
+                        userId: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        comments: true,
+                    },
+                },
             },
             take: 5, // Limit the number of posts returned
         });
