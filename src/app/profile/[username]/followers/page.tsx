@@ -6,7 +6,11 @@ interface Params {
     username: string;
 }
 
-export async function generateMetadata({ params }: { params: Params }) {
+interface PageProps {
+    params: Params;
+}
+
+export async function generateMetadata({ params }: PageProps) {
     const { username } = await params;
     const user = await getProfileByUsername(username);
 
@@ -21,7 +25,7 @@ export async function generateMetadata({ params }: { params: Params }) {
     };
 }
 
-async function FollowersPage({ params }: { params: Params }) {
+async function FollowersPage({ params }: PageProps) {
     const { username } = await params;
     const user = await getProfileByUsername(username);
 
